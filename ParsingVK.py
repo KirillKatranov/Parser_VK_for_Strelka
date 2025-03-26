@@ -4,6 +4,8 @@ from exeptions import ExeptionCheckAnswerKeys
 import logging
 import requests
 
+from interface_adapters.gateways.parsing_base_gateway.base_gateway import BaseGateway
+
 logger = logging.getLogger("my_logger")
 logger.setLevel(logging.DEBUG)
 
@@ -17,7 +19,7 @@ console_handler.setFormatter(formatter)
 logger.addHandler(console_handler)
 
 
-class ParsingVK:
+class ParsingVK(BaseGateway):
     def __init__(self):
         self.ACCESS_TOKEN = (
             "e55cb58be55cb58be55cb58b7be67746d4ee55ce55cb58b828c1488691a1e2af624bda5"
@@ -176,7 +178,7 @@ class ParsingVK:
         except (ExeptionCheckAnswerKeys, TypeError) as err:
             logger.error(err)
 
-    def get_filter_data(self) -> list[dict]:
+    def fetch_content(self) -> list[dict]:
         return self.post_list
 
     def preaty_print(self):
