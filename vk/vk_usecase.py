@@ -7,6 +7,7 @@ from datetime import  datetime
 from interface_adapters.gateways.npl_base_gateway.base_nlp_processor import (
     NLPProcessorBase,
 )
+
 from interface_adapters.gateways.parsing_base_gateway.base_gateway import BaseGateway
 from usecases.common import AbstractUseCase
 
