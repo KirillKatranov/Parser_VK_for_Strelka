@@ -8,34 +8,31 @@ import logging
 import requests
 
 #from interface_adapters.gateways.parsing_base_gateway.base_gateway import BaseGateway
-logger = logging.getLogger("my_logger")
-logger.setLevel(logging.DEBUG)
 
-console_handler = logging.StreamHandler()
-console_handler.setLevel(logging.INFO)
 
-file_handler = logging.FileHandler("app.log", encoding="utf-8")
-file_handler.setLevel(logging.DEBUG)
+logging.basicConfig(
+    level=logging.INFO,
+    format="%(asctime)s [%(levelname)s] %(name)s: %(message)s",
+    handlers=[
+        logging.FileHandler(f"vk/vk_logs/vk.log", encoding='utf-8'),
+        logging.StreamHandler()  # Чтобы лог был и в консоли (Docker log)
+    ]
+)
 
-formatter = logging.Formatter("%(asctime)s - %(name)s - %(levelname)s - %(message)s")
-console_handler.setFormatter(formatter)
-file_handler.setFormatter(formatter)
+loger = logging.getLogger(__name__)
 
-logger.addHandler(console_handler)
-logger.addHandler(file_handler)
 
 
 class ParsingVK():
     def __init__(self, amount: int = None):
         self.amount_posts = amount if amount is not None else 50
-        #self.post_list = []
         self.ACCESS_TOKEN = (
             "e55cb58be55cb58be55cb58b7be67746d4ee55ce55cb58b828c1488691a1e2af624bda5"
         )
         self.VERSION_VK_API = 5.199
         vk_session = vk_api.VkApi(token=self.ACCESS_TOKEN)
         self.vk = vk_session.get_api()
-        self.group_url = [
+        self.groups_url = [
             "https://vk.com/afishann",
             "https://vk.com/afisha_nnov",
             "https://vk.com/afisha_52_region",
@@ -64,15 +61,15 @@ class ParsingVK():
             "https://vk.com/tchk_unn",
             "https://vk.com/topgid_nnov",
         ]
-        self.amount_group_for_parsing = len(self.group_url)
+        self.amount_group_for_parsing = len(self.groups_url)
 
-    def create_vk_session(self):  # type: ignore
+    # def create_vk_session(self):  # type: ignore
         
-        return 
+    #     return 
 
     def get_sources(self) -> list[str]:
         """Приводим из формата https://vk.com/torpedonn -> torpedonn"""
-        return [group.strip().rsplit("/", 1)[-1] for group in self.group_url]
+        return [group.strip().rsplit("/", 1)[-1] for group in self.groups_url]
     
     
     def parsing(self, group: str = None) -> None:
@@ -101,7 +98,7 @@ class ParsingVK():
 
     def filter_content(self) -> None:
         """
-        Приводим спаршенный контент в нужную форму.
+        Приводим спаршенный контент(несколько постов) из одной группы в нужную форму.
         Пока что форма [{'id': str, 'text': str, 'image': bytes}]
         id - hash соответствующего поста
         """
@@ -140,7 +137,7 @@ class ParsingVK():
         except (ExeptionCheckAnswerKeys, TypeError) as err:
             logger.error(err)
 
-    def fetch_content(self, group) -> list[dict]:
+    def fetch_content(self, group: str) -> list[dict]:
         self.parsing(group)
         self.filter_content()
         return self.post_list
@@ -153,9 +150,11 @@ class ParsingVK():
         print("Количество постов:", len(self.post_list))
 
 
-if __name__ == "__main__":    
-    parser = ParsingVK(200)
+if __name__ == "__main__":  
+    logging.info("start")  
+    parser = ParsingVK(50)
     sources = parser.get_sources()
     for source in sources:
         parser.fetch_content(source)
         parser.preaty_print()
+    logging.info("finish")
